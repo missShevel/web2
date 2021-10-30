@@ -24,7 +24,7 @@ async function sendMail(options) {
     await transport.sendMail(options);
     return { success: true };
   } catch (error) {
-    throw new error(error?.message);
+    throw new Error(error.message);
   }
 }
 
