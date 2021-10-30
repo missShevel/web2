@@ -17,11 +17,12 @@
      return formData;
  };
 
+ let isLoading = false;
+
 const submitHandler = async (event) => {
     const form = document.querySelector('form');
     document.getElementById('button').disabled = true;
-document.getElementsByClassName('loader')[0].style.visibility = 'visible';
-
+    isLoading = true;
     const formData = getFormData(form);
 
     try{
@@ -34,7 +35,7 @@ document.getElementsByClassName('loader')[0].style.visibility = 'visible';
             body: JSON.stringify(formData)
         });
 const result = await response.json();
-console.log(result);
+isLoading = false;
 if(result.result.success){
 document.getElementsByClassName('result')[0].innerText = 'Your message was successfuly delivered!'
 } else {
@@ -42,9 +43,10 @@ document.getElementsByClassName('result')[0].innerText = 'Your message was succe
 }
 } catch(exception) {
 console.log(exception)
+isLoading = false;
+document.getElementsByClassName('result')[0].innerText = ("Error!!!");
 }
 document.getElementById('button').disabled = false;
-document.getElementsByClassName('loader')[0].style.visibility = 'hidden';
 console.log(formData);
 }
 
@@ -64,6 +66,11 @@ function inputChange(e, name){
 </script>
 
 <main>
+  {#if isLoading == true}
+  <div class="loader">
+    <img src="/loader.gif" alt="loader"/>
+</div>
+{:else}
 <div class="bg-contact2" >
     <div class="container-contact2">
         <div class="wrap-contact2">
@@ -71,7 +78,7 @@ function inputChange(e, name){
                 <span class="contact2-form-title">
                     Contact Us
                 </span>
-
+                
                 <div class="wrap-input2" data-validate="Name is required">
                     <input class="input2" type="text" name="name" on:input={
                         (e)=>inputChange(e,"name")
@@ -102,14 +109,11 @@ function inputChange(e, name){
                 </div>
                 <div class = 'result'>
                 </div>
-                <div class="loader" style='visibility: hidden' >
-                    <img src="/loader.gif" alt="loader"/>
-                </div>
-
             </form>
         </div>
     </div>
 </div>
+{/if}
 </main>
 
   <style>
@@ -160,6 +164,7 @@ textarea {
 
 .contact2-form {
   width: 100%;
+  visibility: visible;
 }
 
 .contact2-form-title {
@@ -241,36 +246,15 @@ textarea {
     top: 16px;
 }
 
-/* .not-empty{
-    top: 0;
-} */
-
 input.input2 {
   height: 45px;
 }
-/* 
-input.input2[value=""] + .focus-input2::after {
-  top: 16px;
-  left: 0;
-} */
 
 textarea.input2 {
   min-height: 115px;
   padding-top: 13px;
   padding-bottom: 13px;
 }
-
-/* textarea.input2 + .focus-input2::after {
-  top: 16px;
-  left: 0;
-}
-
-.input2:not([value]) + .focus-input2::after {
-  top: -13px;
-}
-
-.input2:not([value=""]) + .focus-input2::before {
-  width: 100%; }*/
 
 
 .container-contact2-form-btn {
@@ -340,8 +324,12 @@ textarea.input2 {
   left: 0;
 }
 
-
-
+.loader {
+position: absolute;
+width: 1em;
+height: 1em;
+align-items: center;
+}
 
 @media (max-width: 576px) {
   .wrap-contact2 {
