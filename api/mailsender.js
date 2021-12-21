@@ -8,7 +8,7 @@ const history = new Map();
 function getTransporter() {
   return createTransport({
     host: process.env.HOST,
-    port: process.env.PORT,
+    port: process.env.EMIL_PORT,
     secure: false,
     auth: {
       user: process.env.EMAIL_ADDRESS,
