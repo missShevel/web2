@@ -1,6 +1,5 @@
 import { createTransport } from 'nodemailer';
 import sanitizeHTML from 'sanitize-html';
-//do we need it??
 require('dotenv').config();
 
 const from = `Form - ${process.env.EMAIL_ADDRESS}`;
@@ -8,8 +7,8 @@ const history = new Map();
 
 function getTransporter() {
   return createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
+    host: process.env.HOST,
+    port: process.env.PORT,
     secure: false,
     auth: {
       user: process.env.EMAIL_ADDRESS,
@@ -29,16 +28,15 @@ async function sendMail(options) {
 }
 
 async function formSubmit(formData) {
-  const textMessage =
-    'You have new form submission. <br>' +
-    'Name:' +
-    formData.name +
-    '<br>' +
-    'Email: ' +
-    formData.email +
-    '</br>' +
-    'Message: ' +
-    formData.message;
+  const textMessage = `You have new form submission. <br> 
+    Name: 
+    ${formData.name}
+    <br> 
+    Email:  
+    ${formData.email}
+    </br> 
+    Message:  
+    ${formData.message}`;
   return sendMail({
     from,
     to: process.env.EMAIL_TO_USER,
@@ -57,12 +55,13 @@ const rateLimit = (ip, limit) => {
   history.set(ip, history.get(ip) + 1);
 };
 
+const emailCheckRegex =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const nameCheckRegex = /^[a-zA-ZА-ЯЁа-яё]{2,}\s?[a-zA-ZА-ЯЁа-яё]*$/;
+
 function validate(formdata) {
   const email = formdata.email;
   const name = formdata.name;
-  const emailCheckRegex =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  const nameCheckRegex = /^[a-zA-ZА-ЯЁа-яё]{2,}\s?[a-zA-ZА-ЯЁа-яё]*$/;
   if (!emailCheckRegex.test(String(email).toLowerCase())) {
     throw new Error();
   }

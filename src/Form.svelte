@@ -1,33 +1,13 @@
 <script>
-  function getSpan(name) {
-    return document.querySelector(`input[name="${name}"]+span`)
-      ? document.querySelector(`textarea[name="${name}"]+span`)
-      : null;
-  }
-  function setClassToHtml(tag, className) {
-    tag.classList.add(className);
-  }
-  function removeClassToHtml(tag, className) {
-    tag.classList.remove(className);
-  }
   const url = '/api/mailsender';
-  const getFormData = (form) => {
-    const formData = {};
-    new FormData(form).forEach((nameValue, key) => {
-      formData[key] = nameValue;
-    });
-    return formData;
-  };
 
   let isLoading = false;
   let resultText = '';
+  const formData = {};
   const submitHandler = async (event) => {
-    const form = document.querySelector('form');
     document.getElementById('button').disabled = true;
     isLoading = true;
-    const formData = getFormData(form);
     try {
-      console.log(formData);
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -43,25 +23,12 @@
         resultText = result.errors.join(';');
       }
     } catch (exception) {
-      console.log(exception);
-      console.log(document.getElementsByClassName('result')[0]);
       isLoading = false;
       resultText = 'ERRRORRRRR';
     }
     document.getElementById('button').disabled = false;
-    console.log(formData);
   };
 
-  function inputChange(e, name) {
-    const nameSpan = getSpan(name);
-    if (e.target.value.length === 0) {
-      setClassToHtml(nameSpan, 'empty');
-      removeClassToHtml(nameSpan, 'not-empty');
-    } else {
-      setClassToHtml(nameSpan, 'not-empty');
-      removeClassToHtml(nameSpan, 'empty');
-    }
-  }
 </script>
 
 <main>
@@ -84,7 +51,7 @@
                 class="input2"
                 type="text"
                 name="name"
-                on:input={(e) => inputChange(e, 'name')}
+                bind:value={formData.name}
               />
               <span class="focus-input2 empty" data-placeholder="NAME" />
             </div>
@@ -96,7 +63,7 @@
                 class="input2"
                 type="email"
                 name="email"
-                on:input={(e) => inputChange(e, 'email')}
+                bind:value={formData.email}
               />
               <span class="focus-input2 empty" data-placeholder="EMAIL" />
             </div>
@@ -105,7 +72,7 @@
               <textarea
                 class="input2"
                 name="message"
-                on:input={(e) => inputChange(e, 'message')}
+                bind:value={formData.message}
               />
               <span class="focus-input2 empty" data-placeholder="MESSAGE" />
             </div>
