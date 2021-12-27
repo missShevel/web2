@@ -26,9 +26,7 @@
       isLoading = false;
       resultText = 'ERRRORRRRR';
     }
-    document.getElementById('button').disabled = false;
   };
-
 </script>
 
 <main>
@@ -113,7 +111,6 @@
     background-size: cover;
   }
   .container-contact2 {
-    width: 100%;
     min-height: 100vh;
     display: -webkit-box;
     display: -webkit-flex;

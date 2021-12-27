@@ -7,7 +7,7 @@ module.exports = {
     es6: true,
     browser: true,
   },
-  plugins: ['svelte3', 'sonarjs'],
+  plugins: ['svelte3', 'sonarjs', 'babel'],
   overrides: [
     {
       files: ['*.svelte'],

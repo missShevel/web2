@@ -46,13 +46,11 @@ async function formSubmit(formData) {
 }
 
 const rateLimit = (ip, limit) => {
-  if (!history.has(ip)) {
-    history.set(ip, 1);
-  }
   if (history.get(ip) > limit) {
     throw new Error();
   }
-  history.set(ip, history.get(ip) + 1);
+  const count = history.get(ip) ? history.get(ip) : 0;
+  history.set(ip, count + 1);
 };
 
 const emailCheckRegex =
