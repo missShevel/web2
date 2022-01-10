@@ -5,7 +5,3 @@ import Form from './Form.svelte'
 <main>
 <Form/>
 </main>
-
-<style>
-	
-</style>

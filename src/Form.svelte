@@ -5,7 +5,6 @@
   let resultText = '';
   const formData = {};
   const submitHandler = async (event) => {
-    document.getElementById('button').disabled = true;
     isLoading = true;
     try {
       const response = await fetch(url, {
@@ -16,15 +15,15 @@
         body: JSON.stringify(formData),
       });
       const result = await response.json();
-      isLoading = false;
       if (result.result.success) {
         resultText = 'Your message was successfuly delivered!';
       } else {
         resultText = result.errors.join(';');
       }
     } catch (exception) {
+      resultText = exception.message ?? 'ERROR';
+    } finally {
       isLoading = false;
-      resultText = 'ERRRORRRRR';
     }
   };
 </script>
@@ -51,7 +50,7 @@
                 name="name"
                 bind:value={formData.name}
               />
-              <span class="focus-input2 empty" data-placeholder="NAME" />
+              <span class="focus-input2" data-placeholder="NAME" />
             </div>
             <div
               class="wrap-input2 "
@@ -63,7 +62,7 @@
                 name="email"
                 bind:value={formData.email}
               />
-              <span class="focus-input2 empty" data-placeholder="EMAIL" />
+              <span class="focus-input2" data-placeholder="EMAIL" />
             </div>
 
             <div class="wrap-input2" data-validate="Message is required">
@@ -72,13 +71,17 @@
                 name="message"
                 bind:value={formData.message}
               />
-              <span class="focus-input2 empty" data-placeholder="MESSAGE" />
+              <span class="focus-input2" data-placeholder="MESSAGE" />
             </div>
 
             <div class="container-contact2-form-btn">
               <div class="wrap-contact2-form-btn">
                 <div class="contact2-form-bgbtn" />
-                <button class="contact2-form-btn" id="button">
+                <button
+                  disabled={isLoading}
+                  class="contact2-form-btn"
+                  id="button"
+                >
                   Send Your Message
                 </button>
               </div>
@@ -233,10 +236,6 @@
     -o-transition: all 0.4s;
     -moz-transition: all 0.4s;
     transition: all 0.4s;
-  }
-
-  .empty {
-    top: 16px;
   }
 
   input.input2 {

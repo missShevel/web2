@@ -1,29 +1,26 @@
 import { createTransport } from 'nodemailer';
 import sanitizeHTML from 'sanitize-html';
+import { MyError } from '../src/Errors';
 require('dotenv').config();
 
 const from = `Form - ${process.env.EMAIL_ADDRESS}`;
 const history = new Map();
-
-function getTransporter() {
-  return createTransport({
-    host: process.env.HOST,
-    port: process.env.EMIL_PORT,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_ADDRESS,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-}
+const transport = createTransport({
+  host: process.env.HOST,
+  port: process.env.EMIL_PORT,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_ADDRESS,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 async function sendMail(options) {
   try {
-    const transport = getTransporter();
     await transport.sendMail(options);
     return { success: true };
   } catch (error) {
-    throw new Error(error.message);
+    throw MyError.MailError();
   }
 }
 
@@ -46,10 +43,10 @@ async function formSubmit(formData) {
 }
 
 const rateLimit = (ip, limit) => {
-  if (history.get(ip) > limit) {
-    throw new Error();
-  }
   const count = history.get(ip) ? history.get(ip) : 0;
+  if (count >= limit) {
+    throw MyError.RateLimitError();
+  }
   history.set(ip, count + 1);
 };
 
@@ -57,15 +54,13 @@ const emailCheckRegex =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const nameCheckRegex = /^[a-zA-ZА-ЯЁа-яё]{2,}\s?[a-zA-ZА-ЯЁа-яё]*$/;
 
-function validate(formdata) {
-  const email = formdata.email;
-  const name = formdata.name;
+function validate({ email, name }) {
   if (!emailCheckRegex.test(String(email).toLowerCase())) {
-    throw new Error();
+    throw MyError.ValidationError(`${email} is not valid`);
   }
 
   if (!nameCheckRegex.test(String(name))) {
-    throw new Error();
+    throw MyError.ValidationError(`${name} is not valid`);
   }
 }
 
@@ -73,24 +68,16 @@ module.exports = async (req, res) => {
   console.log(req.body);
   try {
     rateLimit(req.headers['x-real-ip'], 3);
-  } catch (e) {
-    return res.status(429).json({
-      errors: ['Limitation error'],
-      result: {
-        success: false,
-      },
-    });
-  }
-  try {
     validate(req.body);
+    const result = await formSubmit(req.body);
+    return res.json({ result });
   } catch (e) {
-    return res.status(402).json({
-      errors: ['Validation error'],
+    return res.status(e.status).json({
+      status: e.status,
+      errors: [e.message],
       result: {
         success: false,
       },
     });
   }
-  const result = await formSubmit(req.body);
-  return res.json({ result });
 };
