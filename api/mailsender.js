@@ -43,7 +43,7 @@ async function formSubmit(formData) {
 }
 
 const rateLimit = (ip, limit) => {
-  const count = history.get(ip) ? history.get(ip) : 0;
+  const count = history.get(ip) || 0;
   if (count >= limit) {
     throw MyError.RateLimitError();
   }
